@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 
+import sections from './sections'
+
 require('../sass/home.sass')
 
 class Application {
@@ -18,13 +20,29 @@ class Application {
 
   init() {
     this.scene = new THREE.Scene()
+    this.timeZero = Date.now()
 
     this.setupRenderer()
     this.setupCamera()
     this.setupHelpers()
+
+    const firstSection = sections[0]
+
+    this.currentSection = new firstSection(
+      this.scene,
+      this.camera,
+      this.timeZero
+    )
+
+    this.currentSection.start()
+  }
+
+  elapsedTime() {
+    return Date.now() - this.timeZero
   }
 
   render = () => {
+    this.currentSection.update()
     this.renderer.render(this.scene, this.camera)
     requestAnimationFrame(this.render)
   }
@@ -44,8 +62,8 @@ class Application {
     const far = 10000
 
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-    this.camera.position.set(0, 100, 100)
-    this.camera.lookAt(new THREE.Vector3(0, 0, 0))
+    this.camera.position.set(25, 25, 50)
+    this.camera.lookAt(new THREE.Vector3(25, 25, 0))
   }
 
   setupHelpers() {
