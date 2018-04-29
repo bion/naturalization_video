@@ -11,7 +11,7 @@ export default class NaturalizationMap {
     this.scene = scene
     this.camera = camera
     this.audioPlayer = audioPlayer
-    this.started = false
+    this.runnning = false
 
     this.init()
   }
@@ -24,33 +24,42 @@ export default class NaturalizationMap {
     this.peopleMeshes = _.times(DATA.roundApplicationsApproved, i =>
       this.makePerson(i)
     )
-
-    this.audioPlayer.audio.setBuffer(this.audioPlayer.audioBuffers.tick)
   }
 
   start() {
     _.forEach(this.peopleMeshes, person => this.scene.add(person))
-    this.started = true
+
+    this.running = true
+
+    this.audioPlayer.audio.setLoop(true)
+    this.audioPlayer.audio.setBuffer(this.audioPlayer.audioBuffers.tick)
+    this.audioPlayer.audio.play()
+
     this.timeZero = Date.now()
   }
 
-  update() {
-    if (!this.started) return
+  done() {
+    this.audioPlayer.audio.stop()
+    this.running = false
+  }
 
-    const revealed = Math.min(
+  update() {
+    if (!this.running) return
+
+    const revealedCount = Math.min(
       Math.round(this.elapsedTime() * 300),
-      DATA.roundApplicationsApproved - 1
+      DATA.roundApplicationsApproved
     )
 
     let willReveal = false
 
-    for (let i = 0; i < revealed; i++) {
+    for (let i = 0; i < revealedCount; i++) {
       willReveal = !willReveal && this.peopleMeshes[i].material.opacity === 0
       this.peopleMeshes[i].material.opacity = 1
     }
 
-    if (willReveal) {
-      this.audioPlayer.audio.play()
+    if (revealedCount === DATA.roundApplicationsApproved) {
+      this.done()
     }
   }
 

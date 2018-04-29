@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import asyncLib from 'async'
+import Mousetrap from 'mousetrap'
 
 import sections from './sections'
 
@@ -7,15 +8,12 @@ require('../sass/home.sass')
 
 class Application {
   constructor(opts = {}) {
-    this.width = window.innerWidth
-    this.height = window.innerHeight
+    this.width = window.innerWidth - 20
+    this.height = window.innerHeight - 20
 
     if (opts.container) {
       this.container = opts.container
-      this.init(() => {
-        this.currentSection.start()
-        this.render()
-      })
+      this.init(this.render)
     } else {
       throw new Error('missing container')
     }
@@ -36,8 +34,14 @@ class Application {
         this.audioPlayer
       )
 
+      Mousetrap.bind('space', this.next)
+
       done()
     })
+  }
+
+  next = () => {
+    this.currentSection.start()
   }
 
   render = () => {
@@ -65,9 +69,15 @@ class Application {
     this.camera.lookAt(new THREE.Vector3(25, 25, 0))
   }
 
+  inDevMode() {
+    return false
+  }
+
   setupHelpers() {
-    this.scene.add(new THREE.GridHelper(200, 16))
-    this.scene.add(new THREE.AxisHelper(75))
+    if (this.inDevMode()) {
+      this.scene.add(new THREE.GridHelper(200, 16))
+      this.scene.add(new THREE.AxisHelper(75))
+    }
   }
 
   setupAudio(done) {

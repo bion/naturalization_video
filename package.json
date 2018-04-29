@@ -54,6 +54,7 @@
   "dependencies": {
     "async": "^2.6.0",
     "lodash": "^4.17.10",
+    "mousetrap": "^1.6.1",
     "orbit-controls-es6": "^1.0.9",
     "three": "^0.87.1"
   }
