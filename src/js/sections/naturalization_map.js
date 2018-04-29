@@ -21,25 +21,20 @@ export default class NaturalizationMap {
   }
 
   init() {
-    this.peopleMeshes = _.times(DATA.roundApplicationsApproved, i =>
-      this.makePerson(i)
-    )
+    this.peopleMeshes = _.times(DATA.roundApplicationsApproved, this.makePerson)
   }
 
   start() {
     _.forEach(this.peopleMeshes, person => this.scene.add(person))
 
     this.running = true
-
-    this.audioPlayer.audio.setLoop(true)
-    this.audioPlayer.audio.setBuffer(this.audioPlayer.audioBuffers.tick)
-    this.audioPlayer.audio.play()
+    this.audioPlayer.playTicks()
 
     this.timeZero = Date.now()
   }
 
   done() {
-    this.audioPlayer.audio.stop()
+    this.audioPlayer.stopTicks()
     this.running = false
   }
 
@@ -65,7 +60,7 @@ export default class NaturalizationMap {
 
   personGeometry = new THREE.CircleGeometry(0.3, 16)
 
-  makePerson(i) {
+  makePerson = i => {
     const person = new THREE.Mesh(
       this.personGeometry,
       new THREE.MeshBasicMaterial({

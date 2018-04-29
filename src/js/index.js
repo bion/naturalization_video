@@ -1,8 +1,8 @@
 import * as THREE from 'three'
-import asyncLib from 'async'
 import Mousetrap from 'mousetrap'
 
 import sections from './sections'
+import AudioPlayer from './audio_player'
 
 require('../sass/home.sass')
 
@@ -81,28 +81,8 @@ class Application {
   }
 
   setupAudio(done) {
-    const listener = new THREE.AudioListener()
-    this.camera.add(listener)
-
-    const audio = new THREE.Audio(listener)
-    const audioBuffers = {}
-
-    const loaderFuncs = ['tick'].map(filename => callback => {
-      const audioLoader = new THREE.AudioLoader()
-
-      audioLoader.load(`public/${filename}.wav`, buffer => {
-        audio.setBuffer(buffer)
-        audioBuffers[filename] = buffer
-        callback()
-      })
-    })
-
-    this.audioPlayer = {
-      audioBuffers,
-      audio
-    }
-
-    asyncLib.parallelLimit(loaderFuncs, 6, done)
+    this.audioPlayer = new AudioPlayer(this.camera)
+    this.audioPlayer.loadBuffers(done)
   }
 }
 
