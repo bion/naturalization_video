@@ -1,41 +1,35 @@
 import * as THREE from 'three'
 import _ from 'lodash'
 
+import Base from './base'
+
 const DATA = {
   applicationsApproved: 716465,
   roundApplicationsApproved: 717
 }
 
-export default class NaturalizationMap {
-  constructor(scene, camera, audioPlayer) {
-    this.scene = scene
-    this.camera = camera
-    this.audioPlayer = audioPlayer
-    this.runnning = false
-
-    this.init()
-  }
-
-  elapsedTime() {
-    return (Date.now() - this.timeZero) / 1000
-  }
-
+// meshStore adds:
+//   acceptedNaturalizationDots: []
+export default class NaturalizationMap extends Base {
   init() {
-    this.peopleMeshes = _.times(DATA.roundApplicationsApproved, this.makePerson)
+    this.meshStore.acceptedNaturalizationDots = []
+
+    for (let i = 0; i < DATA.roundApplicationsApproved; i++) {
+      this.meshStore.acceptedNaturalizationDots.push(this.makePerson(i))
+    }
   }
 
   start() {
-    _.forEach(this.peopleMeshes, person => this.scene.add(person))
+    _.forEach(this.meshStore.acceptedNaturalizationDots, person =>
+      this.scene.add(person)
+    )
 
     this.running = true
     this.audioPlayer.playTicks()
 
     this.timeZero = Date.now()
-  }
 
-  done() {
-    this.audioPlayer.stopTicks()
-    this.running = false
+    this.onDone(() => this.audioPlayer.stopTicks())
   }
 
   update() {
@@ -49,14 +43,19 @@ export default class NaturalizationMap {
     let willReveal = false
 
     for (let i = 0; i < revealedCount; i++) {
-      willReveal = !willReveal && this.peopleMeshes[i].material.opacity === 0
-      this.peopleMeshes[i].material.opacity = 1
+      willReveal =
+        !willReveal &&
+        this.meshStore.acceptedNaturalizationDots[i].material.opacity === 0
+
+      this.meshStore.acceptedNaturalizationDots[i].material.opacity = 1
     }
 
     if (revealedCount === DATA.roundApplicationsApproved) {
-      this.done()
+      this.finish()
     }
   }
+
+  // private
 
   personGeometry = new THREE.CircleGeometry(0.3, 16)
 
@@ -64,13 +63,13 @@ export default class NaturalizationMap {
     const person = new THREE.Mesh(
       this.personGeometry,
       new THREE.MeshBasicMaterial({
-        color: 0x0000ff,
+        color: 0x5c7ae5,
         transparent: true,
         opacity: 0
       })
     )
 
-    const position = this.startingPosition(i)
+    const position = this.personStartingPosition(i)
 
     person.position.x = position.x
     person.position.y = position.y
@@ -79,7 +78,7 @@ export default class NaturalizationMap {
     return person
   }
 
-  startingPosition(i) {
+  personStartingPosition(i) {
     const rowWidth = 15
     const scaler = 1
 

@@ -10,6 +10,7 @@ class Application {
   constructor(opts = {}) {
     this.width = window.innerWidth - 20
     this.height = window.innerHeight - 20
+    this.meshStore = {}
 
     if (opts.container) {
       this.container = opts.container
@@ -31,8 +32,11 @@ class Application {
       this.currentSection = new firstSection(
         this.scene,
         this.camera,
-        this.audioPlayer
+        this.audioPlayer,
+        this.meshStore
       )
+
+      this.currentSection.init()
 
       Mousetrap.bind('space', this.next)
 
@@ -41,7 +45,11 @@ class Application {
   }
 
   next = () => {
-    this.currentSection.start()
+    if (this.currentSection.running) return
+
+    if (!this.currentSection.done) {
+      this.currentSection.start()
+    }
   }
 
   render = () => {
@@ -52,7 +60,8 @@ class Application {
 
   setupRenderer() {
     this.renderer = new THREE.WebGLRenderer({ antialias: true })
-    this.renderer.setClearColor(new THREE.Color(0xeeeeee))
+    this.renderer.setClearColor(new THREE.Color(0xffffff))
+
     this.renderer.setPixelRatio(window.devicePixelRatio || 1)
     this.renderer.setSize(this.width, this.height)
     this.container.appendChild(this.renderer.domElement)
