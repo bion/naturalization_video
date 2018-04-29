@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import asyncLib from 'async'
 
 import sections from './sections'
 
@@ -11,34 +12,32 @@ class Application {
 
     if (opts.container) {
       this.container = opts.container
-      this.init()
-      this.render()
+      this.init(() => {
+        this.currentSection.start()
+        this.render()
+      })
     } else {
       throw new Error('missing container')
     }
   }
 
-  init() {
+  init(done) {
     this.scene = new THREE.Scene()
-    this.timeZero = Date.now()
 
     this.setupRenderer()
     this.setupCamera()
     this.setupHelpers()
+    this.setupAudio(() => {
+      const firstSection = sections[0]
 
-    const firstSection = sections[0]
+      this.currentSection = new firstSection(
+        this.scene,
+        this.camera,
+        this.audioPlayer
+      )
 
-    this.currentSection = new firstSection(
-      this.scene,
-      this.camera,
-      this.timeZero
-    )
-
-    this.currentSection.start()
-  }
-
-  elapsedTime() {
-    return Date.now() - this.timeZero
+      done()
+    })
   }
 
   render = () => {
@@ -69,6 +68,31 @@ class Application {
   setupHelpers() {
     this.scene.add(new THREE.GridHelper(200, 16))
     this.scene.add(new THREE.AxisHelper(75))
+  }
+
+  setupAudio(done) {
+    const listener = new THREE.AudioListener()
+    this.camera.add(listener)
+
+    const audio = new THREE.Audio(listener)
+    const audioBuffers = {}
+
+    const loaderFuncs = ['tick'].map(filename => callback => {
+      const audioLoader = new THREE.AudioLoader()
+
+      audioLoader.load(`public/${filename}.wav`, buffer => {
+        audio.setBuffer(buffer)
+        audioBuffers[filename] = buffer
+        callback()
+      })
+    })
+
+    this.audioPlayer = {
+      audioBuffers,
+      audio
+    }
+
+    asyncLib.parallelLimit(loaderFuncs, 6, done)
   }
 }
 

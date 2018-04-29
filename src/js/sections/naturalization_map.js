@@ -7,9 +7,10 @@ const DATA = {
 }
 
 export default class NaturalizationMap {
-  constructor(scene, camera) {
+  constructor(scene, camera, audioPlayer) {
     this.scene = scene
     this.camera = camera
+    this.audioPlayer = audioPlayer
     this.started = false
 
     this.init()
@@ -23,6 +24,8 @@ export default class NaturalizationMap {
     this.peopleMeshes = _.times(DATA.roundApplicationsApproved, i =>
       this.makePerson(i)
     )
+
+    this.audioPlayer.audio.setBuffer(this.audioPlayer.audioBuffers.tick)
   }
 
   start() {
@@ -39,8 +42,15 @@ export default class NaturalizationMap {
       DATA.roundApplicationsApproved - 1
     )
 
+    let willReveal = false
+
     for (let i = 0; i < revealed; i++) {
+      willReveal = !willReveal && this.peopleMeshes[i].material.opacity === 0
       this.peopleMeshes[i].material.opacity = 1
+    }
+
+    if (willReveal) {
+      this.audioPlayer.audio.play()
     }
   }
 
