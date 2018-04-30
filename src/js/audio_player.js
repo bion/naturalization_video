@@ -26,7 +26,8 @@ export default class AudioPlayer {
   }
 
   playTicks() {
-    this.ticksAudio = new THREE.Audio(this.listener)
+    this.ticksAudio = this.ticksAudio || new THREE.Audio(this.listener)
+
     this.ticksAudio.setLoop(true)
     this.ticksAudio.setBuffer(this.audioBuffers.tick)
     this.ticksAudio.play()

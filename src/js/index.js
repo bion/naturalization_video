@@ -11,6 +11,7 @@ class Application {
     this.width = window.innerWidth - 20
     this.height = window.innerHeight - 20
     this.meshStore = {}
+    this.sectionIndex = -1
 
     if (opts.container) {
       this.container = opts.container
@@ -20,26 +21,33 @@ class Application {
     }
   }
 
+  nextSection = () => {
+    const sectionClass = sections[++this.sectionIndex]
+
+    if (!sectionClass) return
+
+    this.currentSection = new sectionClass(
+      this.scene,
+      this.camera,
+      this.audioPlayer,
+      this.meshStore
+    )
+
+    this.currentSection.init()
+    this.currentSection.onDone(this.nextSection)
+  }
+
   init(done) {
     this.scene = new THREE.Scene()
 
     this.setupRenderer()
     this.setupCamera()
     this.setupHelpers()
+
+    Mousetrap.bind('space', this.next)
+
     this.setupAudio(() => {
-      const firstSection = sections[0]
-
-      this.currentSection = new firstSection(
-        this.scene,
-        this.camera,
-        this.audioPlayer,
-        this.meshStore
-      )
-
-      this.currentSection.init()
-
-      Mousetrap.bind('space', this.next)
-
+      this.nextSection()
       done()
     })
   }

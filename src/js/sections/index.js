@@ -1,3 +1,4 @@
-import NaturalizationMap from './naturalization_map'
+import EnterNaturalizationDots from './enter_naturalization_dots'
+import EnterEligibleDots from './enter_eligible_dots'
 
-export default [NaturalizationMap]
+export default [EnterNaturalizationDots, EnterEligibleDots]

@@ -10,23 +10,24 @@ const DATA = {
 
 // meshStore adds:
 //   acceptedNaturalizationDots: []
-export default class NaturalizationMap extends Base {
+export default class EnterNaturalizationDots extends Base {
   init() {
+    this.imageCenter = this.camera.position
+
     this.meshStore.acceptedNaturalizationDots = []
 
     for (let i = 0; i < DATA.roundApplicationsApproved; i++) {
-      this.meshStore.acceptedNaturalizationDots.push(this.makePerson(i))
+      this.meshStore.acceptedNaturalizationDots.push(this.makeDot(i))
     }
   }
 
   start() {
-    _.forEach(this.meshStore.acceptedNaturalizationDots, person =>
-      this.scene.add(person)
+    _.forEach(this.meshStore.acceptedNaturalizationDots, dot =>
+      this.scene.add(dot)
     )
 
     this.running = true
     this.audioPlayer.playTicks()
-
     this.timeZero = Date.now()
 
     this.onDone(() => this.audioPlayer.stopTicks())
@@ -36,18 +37,16 @@ export default class NaturalizationMap extends Base {
     if (!this.running) return
 
     const revealedCount = Math.min(
-      Math.round(this.elapsedTime() * 300),
+      Math.round(this.elapsedTime() * 600),
       DATA.roundApplicationsApproved
     )
 
+    const dots = this.meshStore.acceptedNaturalizationDots
     let willReveal = false
 
     for (let i = 0; i < revealedCount; i++) {
-      willReveal =
-        !willReveal &&
-        this.meshStore.acceptedNaturalizationDots[i].material.opacity === 0
-
-      this.meshStore.acceptedNaturalizationDots[i].material.opacity = 1
+      willReveal = !willReveal && dots[i].material.opacity === 0
+      dots[i].material.opacity = 1
     }
 
     if (revealedCount === DATA.roundApplicationsApproved) {
@@ -57,11 +56,11 @@ export default class NaturalizationMap extends Base {
 
   // private
 
-  personGeometry = new THREE.CircleGeometry(0.3, 16)
+  dotGeometry = new THREE.CircleGeometry(0.3, 16)
 
-  makePerson = i => {
+  makeDot = i => {
     const person = new THREE.Mesh(
-      this.personGeometry,
+      this.dotGeometry,
       new THREE.MeshBasicMaterial({
         color: 0x5c7ae5,
         transparent: true,
@@ -82,9 +81,12 @@ export default class NaturalizationMap extends Base {
     const rowWidth = 15
     const scaler = 1
 
-    const x = i % rowWidth
-    const y = Math.floor(i / rowWidth) + 1
+    let x = (i % rowWidth) * scaler
+    let y = Math.floor(i / rowWidth) * scaler
 
-    return new THREE.Vector3(x * scaler, y * scaler, 0)
+    x += this.imageCenter.x - 7.5
+    y += this.imageCenter.y - 25
+
+    return new THREE.Vector3(x, y, 0)
   }
 }

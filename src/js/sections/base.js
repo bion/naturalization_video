@@ -22,8 +22,9 @@ export default class Base {
     this.doneCallbacks.forEach(fn => fn())
   }
 
-  elapsedTime() {
-    return (Date.now() - this.timeZero) / 1000
+  elapsedTime(timeZero) {
+    timeZero = timeZero || this.timeZero
+    return (Date.now() - timeZero) / 1000
   }
 
   init() {
