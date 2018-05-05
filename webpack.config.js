@@ -84,7 +84,7 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(['dist'], {
       root: __dirname,
-      exclude: ['favicon.ico'],
+      exclude: ['favicon.ico', 'audio'],
       verbose: true
     }),
     new ExtractTextPlugin('[name].[chunkhash].bundle.css'),
@@ -111,7 +111,6 @@ module.exports = {
   devServer: {
     host: 'localhost',
     port: 8080,
-    publicPath: './dist/public/',
     contentBase: path.join(__dirname, 'dist'),
     inline: true, // live reloading
     stats: {

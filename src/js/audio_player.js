@@ -16,7 +16,7 @@ export default class AudioPlayer {
     const loaderFuncs = AudioPlayer.soundFilenames.map(filename => callback => {
       const audioLoader = new THREE.AudioLoader()
 
-      audioLoader.load(`public/${filename}.wav`, buffer => {
+      audioLoader.load(`/audio/${filename}.wav`, buffer => {
         this.audioBuffers[filename] = buffer
         callback()
       })
